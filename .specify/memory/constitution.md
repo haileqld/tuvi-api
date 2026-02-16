@@ -1,50 +1,113 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+
+- Version change: template placeholders → 1.0.0
+- Modified principles: template placeholders → project-specific Azure Functions principles (I–V)
+- Added sections:
+	- Technology Stack
+	- Workflow & Quality Gates
+- Removed sections: none
+- Templates requiring updates:
+	- ✅ .specify/templates/plan-template.md
+	- ✅ .specify/templates/tasks-template.md
+	- ⚠ .specify/templates/spec-template.md (no change needed; already mandates scenarios/testing)
+	- ⚠ .specify/templates/commands/*.md (folder not present in this repo)
+- Deferred items: none
+-->
+
+# Tuvi API Constitution (Azure Functions Backend for Mobile & SPA)
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Clean Architecture Boundaries
+- Functions are **thin HTTP triggers only**: parse/validate input, call services, format response.
+- Business logic lives in `Services/` and is framework-agnostic (no Azure Functions types).
+- Shared request/response DTOs live in `Models/` and are used by both triggers and services.
+- Repository structure is standardized:
+	- `Functions/`: HTTP triggers only
+	- `Services/`: orchestration and business logic (including AI orchestration)
+	- `Models/`: DTOs and contracts
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Rationale: predictable separation enables testing, security review, and future trigger types.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### II. Zero-Trust Secrets & Managed Identity
+- No API keys, secrets, or connection strings are ever hardcoded or checked into source control.
+- Azure resource access uses `DefaultAzureCredential` by default.
+	- Production uses **system-assigned Managed Identity**.
+	- Local development may use `local.settings.json` and developer identity, but the code path remains
+		credential-based (no “dev-only” auth implementations).
+- Any required secrets belong in Azure Key Vault and are accessed via Managed Identity.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+Rationale: least-privilege and secret hygiene are non-negotiable for public-facing APIs.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### III. Stable API Contract (Envelope + Problem Details)
+- All successful responses return a JSON envelope:
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+	```json
+	{
+		"data": { },
+		"success": true,
+		"error": null
+	}
+	```
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- All error responses return RFC 7807 **Problem Details** with appropriate HTTP status codes
+	(e.g., 400 for validation errors, 401/403 for auth failures, 500 for unexpected errors).
+- JSON serialization uses `System.Text.Json` and **camelCase** property naming.
+- All timestamps/dates are **UTC** in ISO 8601 format.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Rationale: mobile + SPA clients require consistent parsing and predictable error handling.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### IV. Async, DI-First, Stateless Functions
+- All external I/O (OpenAI calls, Storage, Cosmos DB, Key Vault) MUST be `async`.
+- All dependencies are registered in `Program.cs` and injected (including `OpenAIClient` or
+	Microsoft.Extensions.AI abstractions).
+- Functions are stateless. If persistence is required, use Azure Storage or Cosmos DB.
+- CORS must allow only specific origins for the SPA; never `*` in production.
+- Authorization defaults to **Function** level auth for HTTP triggers, unless explicitly deployed
+	behind APIM / an auth gateway where `Anonymous` is acceptable.
+- OpenAPI (Swagger) must be enabled via `Microsoft.Azure.Functions.Worker.Extensions.OpenApi`.
+
+Rationale: DI + statelessness improves scalability; async prevents thread starvation.
+
+### V. AI Safety, Observability, and Cost Discipline
+- AI calls MUST enforce reasonable timeouts and cancellation.
+- Token usage (prompt/completion/total) MUST be logged for cost tracking.
+- Logs must be structured and avoid leaking secrets or sensitive user content.
+- Errors must be captured with enough context to debug without logging confidential payloads.
+
+Rationale: AI is both a reliability and cost risk; observability is required to operate safely.
+
+## Technology Stack
+- Azure Functions v4, **.NET 8 Isolated Worker**
+- Language: C# (latest stable language features)
+- AI integration: `Azure.AI.OpenAI` and/or `Microsoft.Extensions.AI`
+- Identity/auth to Azure resources: `DefaultAzureCredential` + system-assigned Managed Identity
+- OpenAPI: `Microsoft.Azure.Functions.Worker.Extensions.OpenApi`
+- JSON transport: `System.Text.Json`
+- Testing: xUnit + Moq
+
+## Workflow & Quality Gates
+- Every new/changed service method that contains business logic MUST have unit tests.
+- Integration tests focus on the AI service layer by mocking OpenAI responses.
+- All HTTP triggers MUST:
+	- validate inputs
+	- return the standard success envelope on success
+	- return Problem Details on errors
+- PR review MUST explicitly verify compliance with the security non-negotiables and API contract.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+- This constitution supersedes other conventions in this repository.
+- Amendments:
+	- Must be proposed via PR updating this file.
+	- Must include any necessary template updates under `.specify/templates/`.
+	- Must include a short migration note if behavior or contracts change.
+- Versioning follows semantic versioning:
+	- MAJOR: breaking governance or API contract changes
+	- MINOR: new principle/section or materially expanded guidance
+	- PATCH: clarifications, wording fixes, non-semantic refinements
+- Compliance expectations:
+	- Reviews treat “Security Non-Negotiables” and “API Contract” as blocking.
+	- Violations require explicit justification and an approved amendment.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-02-16 | **Last Amended**: 2026-02-16
