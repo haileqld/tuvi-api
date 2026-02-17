@@ -5,6 +5,15 @@
 **Status**: Draft  
 **Input**: User description: "Vietnamese Horoscope (Tử Vi) API: birth data → lunar/can-chi → Nam Phái chart → AI interpretation"
 
+## Clarifications
+
+### Session 2026-02-16
+- Q: Which AI model should be used for the "AI translation layer" that generates the horoscope interpretation? → A: Self-hosted Open Source (e.g., Llama 3)
+- Q: What is the target server-side response time for a typical successful API call? → A: p90 < 5000ms
+- Q: Should a rate-limiting mechanism be implemented to protect the API from abuse or high traffic spikes? → A: Yes, implement basic rate limiting
+- Q: Which specific client-provided fields (excluding `name`) should be included in the deterministic hash for caching (FR-014)? → A: `gender`, `gregorianBirthDate`, `timezoneOffset`, `language`, `includeTechnicalDetails`
+- Q: Does the API need to comply with specific data privacy regulations (e.g., GDPR, CCPA, HIPAA) regarding the handling of birth details (PII)? → A: No, not applicable/out of scope
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Generate an interpretation from birth details (Priority: P1)
@@ -92,12 +101,13 @@ As a user, I want to choose Vietnamese or English output so I can read the inter
 
 - **FR-013**: System MUST support localization for at least Vietnamese and English via a language parameter.
 
-- **FR-014**: System MUST cache generated interpretations for 30 days based on a stable hash of chart-relevant birth details and request options that affect narrative output (e.g., language and includeTechnicalDetails).
+- **FR-014**: System MUST cache generated interpretations for 30 days based on a stable hash of the following fields: `gender`, `gregorianBirthDate`, `timezoneOffset`, `language`, `includeTechnicalDetails`.
 - **FR-015**: System MUST avoid storing secrets in code and MUST use managed identity/keyless authentication for cloud resource access in production.
 - **FR-016**: System MUST track and log token usage per request for cost monitoring.
 - **FR-017**: System MUST provide machine-readable API documentation for the endpoint, including request/response schemas and error shapes.
 
-- **FR-018**: System MUST enforce a reasonable timeout for AI interpretation generation and return an appropriate error response when the AI provider is unavailable.
+- **FR-018**: System MUST enforce a 30-second timeout for AI interpretation generation and return an appropriate error response when the AI provider is unavailable.
+- **FR-019**: System MUST implement a basic rate-limiting mechanism to protect against abuse and high traffic spikes, enforcing a limit of 60 requests per minute per IP address.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -120,6 +130,7 @@ As a user, I want to choose Vietnamese or English output so I can read the inter
 - **SC-003**: The deterministic technical chart matches an approved reference suite with 100% pass rate for a curated set of test cases.
 - **SC-004**: The response includes a score (0–100) for each major life area and at least one actionable tip per area in 100% of successful responses.
 - **SC-005**: Token usage is captured for ≥ 99% of AI-invoking requests and can be aggregated by day.
+- **SC-006**: The server-side response time for 90% of successful API calls must be less than 5000ms (p90 < 5000ms).
 
 ## Assumptions
 
