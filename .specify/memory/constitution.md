@@ -1,17 +1,14 @@
 <!--
 Sync Impact Report
 
-- Version change: template placeholders → 1.0.0
-- Modified principles: template placeholders → project-specific Azure Functions principles (I–V)
-- Added sections:
-	- Technology Stack
-	- Workflow & Quality Gates
+- Version change: 1.1.0 → 1.1.1
+- Modified principles:
+	- Development Environment (Mandatory Dev Container, Monorepo Support)
+- Added sections: none
 - Removed sections: none
 - Templates requiring updates:
-	- ✅ .specify/templates/plan-template.md
-	- ✅ .specify/templates/tasks-template.md
-	- ⚠ .specify/templates/spec-template.md (no change needed; already mandates scenarios/testing)
-	- ⚠ .specify/templates/commands/*.md (folder not present in this repo)
+	- ⚠ .specify/templates/plan-template.md
+	- ⚠ .specify/templates/tasks-template.md
 - Deferred items: none
 -->
 
@@ -87,6 +84,12 @@ Rationale: AI is both a reliability and cost risk; observability is required to 
 - JSON transport: `System.Text.Json`
 - Testing: xUnit + Moq
 
+## Development Environment
+1. **Mandatory Dev Container**: All development, including for the Azure Function API and the frontend React SPA, MUST be capable of running inside a single `.devcontainer` configuration.
+2. **Base Image**: The Dev Container MUST use the `.NET 8` base image.
+3. **Features**: The Dev Container MUST include `Node.js` (LTS) and `Azure CLI` as installed features.
+4. **Monorepo Support**: The container MUST forward ports for both the API (7071) and Web (5173), and the Mobile bundler (8081).
+
 ## Workflow & Quality Gates
 - Every new/changed service method that contains business logic MUST have unit tests.
 - Integration tests focus on the AI service layer by mocking OpenAI responses.
@@ -110,4 +113,4 @@ Rationale: AI is both a reliability and cost risk; observability is required to 
 	- Reviews treat “Security Non-Negotiables” and “API Contract” as blocking.
 	- Violations require explicit justification and an approved amendment.
 
-**Version**: 1.0.0 | **Ratified**: 2026-02-16 | **Last Amended**: 2026-02-16
+**Version**: 1.1.1 | **Ratified**: 2026-02-16 | **Last Amended**: 2026-02-17
