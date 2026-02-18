@@ -1,27 +1,43 @@
-# Research & Decisions
+# Phase 0 Research & Decisions
 
-This document records the technical decisions made to resolve points marked as "NEEDS CLARIFICATION" in the implementation plan.
+This document records the decisions made to resolve ambiguities and satisfy constitutional requirements identified in the implementation plan.
 
-## Decision 1: Build Tooling
+## 1. Frontend Testing Framework
 
-- **Decision**: **Vite** will be used as the build tool and development server for the React web application.
-- **Rationale**: Vite offers a significantly faster developer experience compared to older tools like Create React App, thanks to its native ES module support and extremely fast Hot Module Replacement (HMR). It provides excellent first-party support for TypeScript and React, aligns with modern web development practices, and is highly configurable for production builds.
+- **Unknown**: The `spec.md` mandates unit test coverage but does not specify a testing framework.
+- **Decision**: **Vitest** with **React Testing Library**.
+- **Rationale**:
+    - **Vite Integration**: Vitest is designed for Vite and offers a fast, seamless development experience with near-instant test re-runs.
+    - **Modern**: It uses modern ES modules and has a Jest-compatible API, making it easy to learn for developers familiar with Jest.
+    - **Industry Standard**: React Testing Library is the de-facto standard for testing React components in a way that resembles how users interact with them, leading to more robust and maintainable tests.
 - **Alternatives Considered**:
-    - **Create React App (CRA)**: Rejected due to its slower performance and lack of configuration flexibility without "ejecting".
-    - **Next.js**: Rejected because it is a full-stack framework with features like Server-Side Rendering (SSR), which are not required for this simple SPA and would add unnecessary complexity.
+    - **Jest**: While a very popular choice, it requires more complex configuration to work with Vite (`babel-jest`, etc.). Vitest provides a more native and efficient experience in this toolchain.
 
-## Decision 2: Monorepo Tooling
+## 2. Client-Side Observability
 
-- **Decision**: **pnpm workspaces** will be used to manage the monorepo structure.
-- **Rationale**: To fulfill the core architectural requirement of code sharing (AR-001), a monorepo is essential. `pnpm` is a fast, disk-space-efficient package manager with robust, built-in support for workspaces. This setup will allow for a clean separation of the `packages/core` (shared logic) and `packages/web` (SPA) projects, while simplifying dependency management and cross-package linking. It provides the ideal foundation for adding a `packages/native` project in the future.
+- **Violation**: The project violates Constitution Principle V by lacking any client-side logging or error monitoring.
+- **Decision**: Integrate **Azure Application Insights**.
+- **Rationale**:
+    - **Ecosystem Alignment**: The project backend is built on Azure Functions. Using Application Insights for the frontend allows for unified, end-to-end distributed tracing, from a user click in the SPA down to the AI call in the backend.
+    - **Comprehensive Features**: It provides robust error tracking, performance monitoring (client-side metrics), and user behavior analytics.
+    - **Managed Identity**: It aligns with the Zero-Trust secret management principle, as the instrumentation key can be managed securely.
 - **Alternatives Considered**:
-    - **npm/yarn workspaces**: Rejected in favor of pnpm's superior performance and more efficient handling of `node_modules`.
-    - **Turborepo/Nx**: Rejected as these are more complex build orchestration tools. While powerful, they are overkill for the current two-package setup and can be added on top of pnpm workspaces later if the project's complexity grows.
+    - **Sentry**: An excellent and popular open-source error tracking tool. It's a strong alternative, but Application Insights offers tighter integration with the existing Azure backend stack.
+    - **LogRocket**: Provides session replay, which is very powerful, but might be overkill for the initial version of this application. It could be considered in the future if more detailed UX analysis is needed.
 
-## Decision 3: API Key Retrieval Strategy
+## 3. Mandatory Development Environment
 
-- **Decision**: A new, dedicated **HTTP-triggered Azure Function** will be created to act as a secure endpoint for retrieving the `TuviApi` function key. This new function will be secured using Azure AD authentication.
-- **Rationale**: The specification (TR-002) requires retrieving the API key from a secure, authenticated endpoint. Creating another Azure Function keeps the technology stack consistent with the existing backend. The frontend SPA will first authenticate the user with Azure AD (using a library like MSAL.js), acquire an access token, and then use that token to call this new "key-provider" function. The key-provider function will validate the token and return the API key for the main `GenerateHoroscope` function. This securely brokers access without exposing the function key directly to the client bundle.
-- **Alternatives Considered**:
-    - **Build-time Environment Variable**: Rejected as this is highly insecure, exposing the key in the compiled JavaScript.
-    - **Backend for Frontend (BFF) Proxy**: A valid but more complex alternative. It would involve creating a new Node.js or C# service to proxy all API requests. Creating a single function just to vend the key is a simpler, more direct implementation of the "retrieve from secure endpoint" requirement.
+- **Violation**: The project is missing the mandatory `.devcontainer` as required by the constitution's "Development Environment" section.
+- **Decision**: A `.devcontainer/devcontainer.json` file will be created at the repository root.
+- **Rationale**: This is a mandatory requirement of the project constitution to ensure a consistent and reproducible development environment for all contributors. The container will encapsulate all necessary dependencies (.NET SDK, Node.js, Azure CLI).
+- **Implementation Details**:
+    - **Base Image**: `mcr.microsoft.com/devcontainers/dotnet:8.0`
+    - **Features**:
+        - `ghcr.io/devcontainers/features/node:1`: To install Node.js (LTS).
+        - `ghcr.io/devcontainers/features/azure-cli:1`: To install the Azure CLI.
+    - **Forwarded Ports**:
+        - `7071`: For the Azure Functions API.
+        - `5173`: For the Vite dev server (React SPA).
+        - `8081`: Reserved for the React Native packager in the future.
+    - **Post-Create Command**: `npm install -g pnpm` to make the chosen package manager available globally in the container.
+- **Alternatives Considered**: None. This is a mandatory constitutional requirement.

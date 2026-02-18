@@ -4,11 +4,11 @@ This task list is generated from the design artifacts and organized for incremen
 
 ## Phase 1: Project Setup (Monorepo & Web App)
 
-- [ ] T001 Create `pnpm-workspace.yaml` in the repository root for monorepo setup
-- [ ] T002 Initialize root `package.json` and configure `pnpm` workspaces
-- [ ] T003 Create `packages/core` directory and initialize `package.json` for shared logic
+- [x] T001 Create `pnpm-workspace.yaml` in the repository root for monorepo setup
+- [x] T002 Initialize root `package.json` and configure `pnpm` workspaces
+- [x] T003 Create `packages/core` directory and initialize `package.json` for shared logic
 - [ ] T004 Create `packages/web` directory and initialize a Vite + React + TypeScript project inside it
-- [ ] T005 Install root development dependencies (e.g., `typescript`, `jest`, `eslint`, `prettier`, `vitest`)
+- [ ] T005 Install root development dependencies (e.g., `typescript`, `vitest`, `jest`, `eslint`, `prettier`)
 - [ ] T006 Configure shared ESLint and Prettier for the monorepo
 - [ ] T007 Configure `tsconfig.json` for `packages/core` and `packages/web` with appropriate path aliases
 - [ ] T008 Create `.devcontainer` folder and `devcontainer.json` based on the project constitution (Node.js LTS, Azure CLI, port forwarding)

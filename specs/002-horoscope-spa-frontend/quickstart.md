@@ -1,37 +1,66 @@
-# Quickstart: Horoscope SPA Frontend
+# Quickstart Guide: Horoscope SPA Frontend
 
-This guide provides instructions for setting up and running the frontend development environment.
+This guide explains how to set up and run the frontend development environment using the mandatory Dev Container.
 
 ## Prerequisites
 
--   [Node.js](https://nodejs.org/) (LTS version)
--   [pnpm](https://pnpm.io/installation)
+1.  **Git**: To clone the repository.
+2.  **VS Code**: The recommended editor.
+3.  **Docker Desktop**: The Dev Container feature relies on Docker to build and run the containerized environment.
+4.  **VS Code Dev Containers Extension**: Ensure the `ms-vscode-remote.remote-containers` extension is installed in VS Code.
 
-## Setup
+## Running the Development Environment
 
-The project is structured as a monorepo using pnpm workspaces.
+### 1. Open the Project in the Dev Container
 
-1.  **Install dependencies**:
-    From the root of the `tuvi-api` repository, run the pnpm install command. This will install dependencies for all packages (`core`, `web`, etc.).
+1.  Clone the repository to your local machine.
+2.  Open the repository's root folder in VS Code.
+3.  VS Code will detect the `.devcontainer/devcontainer.json` file and show a notification toast in the bottom-right corner: *"Folder contains a Dev Container configuration file. Reopen in Container."*
+4.  Click the **"Reopen in Container"** button.
+5.  VS Code will now build the Docker image and start the container. This may take several minutes on the first run. A terminal will open showing the progress.
 
-    ```bash
-    pnpm install
-    ```
+### 2. Install Dependencies
 
-## Running the Development Server
+Once the container is running and you have a terminal prompt inside VS Code (it should look something like `vscode ➜ /workspaces/tuvi-api`), install all monorepo dependencies using `pnpm`.
 
-1.  **Start the web application**:
-    To run the React SPA in development mode, use the pnpm filter command to target the `web` package.
+```bash
+pnpm install
+```
 
-    ```bash
-    pnpm --filter web dev
-    ```
+### 3. Run the Frontend Dev Server
 
-2.  **Access the application**:
-    Once the command completes, you can access the application in your browser at the URL provided (typically `http://localhost:5173`).
+After the installation is complete, you can start the React application's Vite dev server.
 
-    The development server supports Hot Module Replacement (HMR), so changes you make to the source code will be reflected in the browser instantly without a full page reload.
+```bash
+# This command targets the 'web' package defined in the root pnpm-workspace.yaml
+pnpm --filter web dev
+```
 
-## Running the Backend API
+The server will start, and you should see output similar to this:
 
-For the frontend to function, the backend API must also be running. Ensure the API is running on port `7071` as specified in the project constitution.
+```
+  VITE v5.x.x  ready in XXXms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+```
+
+VS Code will automatically forward port 5173 from the container to your local machine. You can now open a browser and navigate to **http://localhost:5173** to see the application running.
+
+### 4. Running the Backend API
+
+To have a fully functional application, you also need to run the backend Azure Function API.
+
+1.  Open a **new terminal** in VS Code (while still inside the Dev Container).
+2.  Navigate to the API project directory and run it:
+
+```bash
+# Ensure you are in the correct directory for the C# project
+cd src/
+
+# Run the Azure Function host
+func start
+```
+
+The API will start on port 7071, which is also forwarded automatically. The frontend is configured to send requests to this port.

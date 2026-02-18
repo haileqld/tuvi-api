@@ -18,6 +18,23 @@ Thumbs.db
 *.tmp
 *.swp
 
+
+# Node.js/TypeScript
+node_modules/
+dist/
+build/
+*.log
+.env*
+coverage/
+
+# pnpm
+pnpm-lock.yaml
+
+# Monorepo packages
+packages/*/node_modules/
+packages/*/dist/
+packages/*/build/
+
 # Local settings
 local.settings.json
 secrets.json

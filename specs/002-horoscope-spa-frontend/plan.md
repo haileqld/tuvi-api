@@ -1,73 +1,94 @@
-# Implementation Plan: Tuvi Horoscope SPA Frontend
+# Implementation Plan: Tuvi Horoscope API & SPA
 
-**Branch**: `002-horoscope-spa-frontend` | **Date**: 2026-02-17 | **Spec**: [spec.md](./spec.md)
+**Branch**: `002-horoscope-spa-frontend` | **Date**: 2026-02-18 | **Spec**: [Combined]
+**Input**: Merged from plans for `001` and `002`. Updated with a unified constitution and corrected project structure.
 
 ## Summary
 
-This plan outlines the implementation of a React SPA frontend for the Tuvi Horoscope API. The application will be built using a modern TypeScript and React stack, featuring a shareable core logic layer designed for future reuse in a React Native application, as mandated by the specification (AR-001). The project will be set up as a monorepo to facilitate this code-sharing strategy.
+This master plan outlines the implementation for the complete Tuvi Horoscope system, comprising a C#/.NET 8 backend and a React/TypeScript frontend.
+
+The **backend** will be an Azure Functions API located at `src/api`. It will accept birth details, generate a horoscope chart, use an AI service for interpretation, and return a structured result.
+
+The **frontend** will be a React SPA located at `src/web`. Its primary architectural driver is future code sharing with a mobile app, achieved by isolating all shared, platform-agnostic logic (state, API services, types) into a dedicated `src/shared` directory.
+
+The entire system will be developed within a unified monorepo, orchestrated via the Azure Developer CLI (`azd`), and governed by the single, comprehensive constitution defined within this document.
 
 ## Technical Context
 
-**Language/Version**: TypeScript, React 18+
-**Primary Dependencies**: React, Redux Toolkit, Material-UI (MUI), Vite
-**Storage**: N/A (Client-side, uses browser local storage for settings if needed)
-**Testing**: Jest, React Testing Library
-**Target Platform**: Modern Browsers (last 2 versions)
-**Project Type**: Web Application (Monorepo with shareable core)
-**Performance Goals**: Lighthouse score >= 90; Initial interpretation in < 60s.
-**Constraints**: MUST be structured for code sharing with React Native.
-**Scale/Scope**: A single-page application with one primary user flow (horoscope generation).
-**Build Tooling**: Vite (NEEDS CLARIFICATION)
-**Monorepo Tooling**: pnpm workspaces (NEEDS CLARIFICATION)
-**API Key Retrieval**: Dedicated authenticated Azure Function (NEEDS CLARIFICATION)
-
-## Constitution Check
-
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
-- **Development Environment Principle**: PASS. The monorepo structure with designated ports for API (7071) and Web (5173) aligns with the Dev Container principle. The plan will include creating the `.devcontainer` configuration.
-
-**Result**: All gates pass.
+| Area | Backend (API) | Frontend (SPA) | Shared |
+|---|---|---|---|
+| **Language** | C# (.NET 8) | TypeScript, React 18+ | TypeScript |
+| **Framework** | Azure Functions v4 | Vite, MUI | Redux Toolkit |
+| **Testing** | xUnit, Moq | Vitest, RTL | Vitest |
+| **Orchestration** | \multicolumn{3}{c|}{Azure Developer CLI (`azd`)} |
+| **Environment** | \multicolumn{3}{c|}{Single Dev Container} |
 
 ## Project Structure
 
-### Documentation (this feature)
+The project will be organized in a unified monorepo structure with a clear separation between backend, frontend, and shared code.
 
 ```text
-specs/002-horoscope-spa-frontend/
-├── plan.md              # This file
-├── research.md          # Phase 0 output
-├── data-model.md        # Phase 1 output
-├── quickstart.md        # Phase 1 output
-├── contracts/           # Phase 1 output
-│   └── api-types.ts
-└── tasks.md             # Phase 2 output (created by /speckit.tasks)
+/
+├── .devcontainer/
+│   └── devcontainer.json
+├── src/
+│   ├── api/               # BACKEND: C# Azure Functions Project
+│   │   ├── Functions/
+│   │   ├── Services/
+│   │   └── TuviApi.csproj
+│   ├── web/                 # FRONTEND: React SPA
+│   │   ├── src/
+│   │   │   └── main.tsx
+│   │   └── package.json
+│   └── shared/              # SHARED: Platform-agnostic TS logic
+│       ├── src/
+│       │   ├── state/
+│       │   ├── services/
+│       │   └── types/
+│       └── package.json
+├── tests/
+│   └── api/               # BACKEND: xUnit tests
+│       └── TuviApi.Tests.csproj
+├── azure.yaml
+└── pnpm-workspace.yaml
 ```
 
-### Source Code (repository root)
+**Structure Decision**: This `src/api`, `src/web`, and `src/shared` structure provides the cleanest separation of concerns, directly enabling the code-sharing requirement while maintaining a standard monorepo layout compatible with tools like `azd`.
 
-```text
-# Monorepo Structure
-packages/
-├── core/                  # Platform-agnostic shared logic
-│   ├── src/
-│   │   ├── state/         # Redux Toolkit store, slices
-│   │   └── services/      # API client
-│   └── package.json
-└── web/                   # React SPA
-    ├── src/
-    │   ├── components/    # Presentational React components
-    │   ├── containers/    # Container components (logic)
-    │   ├── pages/         # App pages
-    │   └── main.tsx
-    └── package.json
+---
 
-pnpm-workspace.yaml        # pnpm workspaces definition
-package.json               # Root package.json
-```
+## Project Constitution
 
-**Structure Decision**: A monorepo managed by pnpm workspaces is chosen to align with the primary architectural requirement (AR-001) of separating a `core` logic package from the `web` presentation package. This structure provides the best foundation for future code sharing with a React Native application.
+### I. Core Architectural Principles
 
-## Complexity Tracking
+1.  **Backend: Clean Architecture.** The API backend code MUST maintain a strict separation of concerns. `Functions/` are for thin HTTP triggers only. All business logic, orchestration, and data access MUST reside in `Services/`. All DTOs and contracts MUST be in `Models/`.
+2.  **Frontend: Decoupled Architecture.** The React frontend code MUST be structured for reusability. All platform-agnostic, shareable logic (Redux state, API service calls, type definitions) MUST reside in `src/shared`. UI components in `src/web` should be primarily "presentational," receiving data and callbacks as props from higher-level container components that interact with the shared logic.
+3.  **Security: Zero-Trust Secrets.** No API keys, secrets, or connection strings may be hardcoded. Backend access to Azure resources MUST use `DefaultAzureCredential` (and Managed Identity in production). Secrets MUST be stored in Azure Key Vault.
+4.  **API: Stable Contract.** All successful API responses MUST return a `{ "data": ... }` envelope. All errors MUST return RFC 7807 Problem Details. JSON serialization MUST be camelCase.
+5.  **Observability: Unified & Disciplined.** Both backend and frontend MUST be instrumented for observability (e.g., via Azure Application Insights). Backend AI calls MUST log token usage for cost tracking. Logs MUST be structured and MUST NOT leak sensitive user data.
 
-> No violations of the constitution have been identified or justified.
+### II. Technology Stack
+
+-   **Backend**: C# on .NET 8 (Isolated Worker), Azure Functions v4
+-   **Frontend**: TypeScript on React 18+
+-   **Shared Logic**: TypeScript, Redux Toolkit
+-   **Tooling**: Vite (frontend), xUnit/Moq (backend testing), Vitest/RTL (frontend testing)
+-   **Azure Integration**: `Azure.AI.OpenAI`, `DefaultAzureCredential`, Azure Developer CLI (`azd`)
+
+### III. Development Environment
+
+1.  **Mandatory Dev Container**: All development MUST be performed within the single, unified `.devcontainer` configuration at the root of the repository.
+2.  **Configuration**: The Dev Container will use the `.NET 8` base image and include `Node.js` (LTS), `Azure CLI`, and `azd` as features.
+3.  **Ports**: The container will forward ports `7071` (API) and `5173` (Web).
+
+### IV. Workflow & Quality Gates
+
+-   All new business logic (backend or frontend) MUST be accompanied by unit tests.
+-   PR reviews MUST explicitly verify compliance with the Core Architectural Principles.
+-   Code MUST adhere to existing style and formatting conventions.
+
+### V. Governance
+
+-   This constitution is the single source of truth for all architectural and structural decisions in this repository.
+-   Amendments must be proposed via PR.
+-   Versioning follows SemVer (MAJOR for breaking changes, MINOR for new principles, PATCH for clarifications).

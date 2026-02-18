@@ -1,9 +1,10 @@
 <!--
 Sync Impact Report
 
-- Version change: 1.1.0 → 1.1.1
+- Version change: 1.2.0 → 1.2.1
 - Modified principles:
-	- Development Environment (Mandatory Dev Container, Monorepo Support)
+	- Title
+	- Workflow & Quality Gates
 - Added sections: none
 - Removed sections: none
 - Templates requiring updates:
@@ -12,7 +13,7 @@ Sync Impact Report
 - Deferred items: none
 -->
 
-# Tuvi API Constitution (Azure Functions Backend for Mobile & SPA)
+# Tuvi Monorepo Constitution (Azure Functions Backend & React SPA Frontend)
 
 ## Core Principles
 
@@ -83,6 +84,10 @@ Rationale: AI is both a reliability and cost risk; observability is required to 
 - OpenAPI: `Microsoft.Azure.Functions.Worker.Extensions.OpenApi`
 - JSON transport: `System.Text.Json`
 - Testing: xUnit + Moq
+- **Frontend**: React SPA (TypeScript, React 18+, Vite, Redux Toolkit, Material-UI (MUI))
+
+## Project Structure Guidelines
+All primary application code MUST reside in the `src/` directory. Backend API code MUST be located under `src/api/`. Frontend SPA code MUST be located under `src/web/`. Shared code or utilities that are platform-agnostic MAY reside directly under `src/shared/` or be defined as internal packages within a `packages/` directory, depending on project complexity and build tool capabilities.
 
 ## Development Environment
 1. **Mandatory Dev Container**: All development, including for the Azure Function API and the frontend React SPA, MUST be capable of running inside a single `.devcontainer` configuration.
@@ -98,6 +103,7 @@ Rationale: AI is both a reliability and cost risk; observability is required to 
 	- return the standard success envelope on success
 	- return Problem Details on errors
 - PR review MUST explicitly verify compliance with the security non-negotiables and API contract.
+- Frontend unit tests MUST cover Redux slices and key presentational components.
 
 ## Governance
 - This constitution supersedes other conventions in this repository.
@@ -113,4 +119,4 @@ Rationale: AI is both a reliability and cost risk; observability is required to 
 	- Reviews treat “Security Non-Negotiables” and “API Contract” as blocking.
 	- Violations require explicit justification and an approved amendment.
 
-**Version**: 1.1.1 | **Ratified**: 2026-02-16 | **Last Amended**: 2026-02-17
+**Version**: 1.2.1 | **Ratified**: 2026-02-16 | **Last Amended**: 2026-02-17
