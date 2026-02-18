@@ -6,6 +6,11 @@
 
 ## Clarifications
 
+### Session 2026-02-18
+- Q: The plan specifies using `src/shared` for shareable code. Should I update architectural requirement AR-002 in the spec to make `src/shared` the required directory, replacing the previous suggestions? → A: yes
+- Q: The project constitution requires client-side observability. Should I add a new non-functional requirement to the spec mandating the use of Azure Application Insights for error and performance monitoring? → A: yes
+- Q: To complete the alignment, should I add a new technical requirement to the spec that mandates **Vitest** and **React Testing Library** for frontend testing? → A: yes
+
 ### Session 2026-02-17
 - Q: Which UI component library should be used to build the user interface? → A: Material-UI (MUI)
 - Q: Which state management library should be used for the application's core logic, as mentioned in AR-002? → A: Redux Toolkit
@@ -16,6 +21,7 @@
 ## Non-Functional Requirements
 
 - **NFR-001 (UI Framework)**: The application MUST use the Material-UI (MUI) component library for all standard UI elements to ensure a consistent, modern, and accessible design.
+- **NFR-002 (Observability)**: The application MUST be instrumented with Azure Application Insights to track client-side errors, log key user interactions, and monitor performance metrics.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -75,14 +81,14 @@ As a user, I want to switch the application's display language between English a
 ### Architectural & Technical Requirements (Code Sharing)
 
 -   **AR-001**: The application MUST be structured to separate business logic, state management, and API services from the web-specific UI components. This is the highest priority architectural constraint to ensure future code sharing with React Native.
--   **AR-002**: A shared directory (e.g., `packages/core` or `src/core`) MUST contain all platform-agnostic code, including:
+-   **AR-002**: The `src/shared` directory MUST contain all platform-agnostic code, including:
     -   State management logic (using **Redux Toolkit**).
     -   API service layer for making calls to the backend.
     -   Type definitions for API request/response objects.
 -   **AR-003**: React components in the web application (`src/components`) MUST be primarily "presentational" (dumb), receiving all data and callback functions as props from higher-level "container" components that interact with the state management layer.
--   **TR-001 (UI Framework)**: The application MUST use the **Material-UI (MUI)** component library for all standard UI elements to ensure a consistent, modern, and accessible design.
 -   **TR-002 (API Key Management)**: The frontend application MUST retrieve the API key from a dedicated, authenticated endpoint at runtime to securely authenticate with the Azure Function backend.
 -   **TR-003 (Browser Support)**: The application MUST support the latest two major versions of evergreen browsers (Chrome, Firefox, Edge, Safari).
+-   **TR-004 (Frontend Testing)**: Frontend unit and integration tests MUST be written using **Vitest** and **React Testing Library**.
 
 ### Functional Requirements
 

@@ -1,66 +1,88 @@
-# Implementation Tasks: Tuvi Horoscope SPA Frontend
+# Task List: Tuvi Horoscope SPA Frontend
 
-This task list is generated from the design artifacts and organized for incremental, independent implementation of each user story.
+This task list is generated from the feature specification and implementation plan. The tasks are organized into phases that should be completed in order to ensure a smooth, dependency-aware development process.
 
-## Phase 1: Project Setup (Monorepo & Web App)
+## Implementation Strategy
 
-- [x] T001 Create `pnpm-workspace.yaml` in the repository root for monorepo setup
-- [x] T002 Initialize root `package.json` and configure `pnpm` workspaces
-- [x] T003 Create `packages/core` directory and initialize `package.json` for shared logic
-- [ ] T004 Create `packages/web` directory and initialize a Vite + React + TypeScript project inside it
-- [ ] T005 Install root development dependencies (e.g., `typescript`, `vitest`, `jest`, `eslint`, `prettier`)
-- [ ] T006 Configure shared ESLint and Prettier for the monorepo
-- [ ] T007 Configure `tsconfig.json` for `packages/core` and `packages/web` with appropriate path aliases
-- [ ] T008 Create `.devcontainer` folder and `devcontainer.json` based on the project constitution (Node.js LTS, Azure CLI, port forwarding)
+The implementation will follow an MVP-first approach, prioritizing the core user story (US1) of generating a horoscope. Each user story is designed to be an independently testable and deliverable increment.
 
-## Phase 2: Foundational Components (Shared Core & UI Base)
+**MVP Scope**: Completion of Phase 1, 2, and 3.
 
-- [ ] T009 Copy `api-types.ts` from `specs/002-horoscope-spa-frontend/contracts/` to `packages/core/src/api/api-types.ts`
-- [ ] T010 Implement API client (e.g., using `axios` or `fetch`) in `packages/core/src/services/apiClient.ts`
-- [ ] T011 Set up Redux Toolkit store, initial state, and root reducer in `packages/core/src/state/store.ts`
-- [ ] T012 Configure `packages/web` to use the shared Redux store from `packages/core` in `packages/web/src/main.tsx`
-- [ ] T013 Configure Material-UI (MUI) theme and `ThemeProvider` in `packages/web/src/App.tsx`
+## Phase 1: Project Setup
 
-## Phase 3: User Story 1 (Generate Interpretation)
+*Goal: Initialize the monorepo structure and all project scaffolds.*
 
-- **Goal**: Allow users to enter birth details and receive an AI-generated horoscope interpretation.
-- **Independent Test**: Load application, fill form with valid data, click "Generate", verify interpretation is displayed.
+- [ ] T001 Create the core directory structure: `src/api`, `src/web`, `src/shared`, `tests/api`
+- [ ] T002 Initialize the C# Azure Functions project in `src/api/TuviApi.csproj`
+- [ ] T003 Initialize the React + Vite frontend project in `src/web/`
+- [ ] T004 Initialize the shared TypeScript package in `src/shared/`
+- [ ] T005 [P] Configure the root `pnpm-workspace.yaml` to include `src/web` and `src/shared`
+- [ ] T006 [P] Create the `.devcontainer/devcontainer.json` file for a consistent development environment
+- [ ] T007 [P] Create the `azure.yaml` file for Azure Developer CLI orchestration
 
-- [ ] T014 [P] [US1] Create `BirthDetailsForm` presentational component in `packages/web/src/components/forms/BirthDetailsForm.tsx` (using MUI components)
-- [ ] T015 [P] [US1] Create `InterpretationDisplay` presentational component in `packages/web/src/components/display/InterpretationDisplay.tsx` (using MUI components)
-- [ ] T016 [US1] Create Redux slice (`horoscopeSlice.ts`) in `packages/core/src/state/` to manage horoscope generation state (`isLoading`, `error`, `result`)
-- [ ] T017 [US1] Implement Redux async thunk in `horoscopeSlice.ts` to call the API client (`packages/core/src/services/apiClient.ts`)
-- [ ] T018 [US1] Create `HoroscopePage` container component in `packages/web/src/pages/HoroscopePage.tsx`
-- [ ] T019 [US1] Integrate `BirthDetailsForm` and `InterpretationDisplay` into `HoroscopePage`, connecting them to the Redux store
-- [ ] T020 [US1] Implement client-side form validation using a library like `react-hook-form` and `yup` within `BirthDetailsForm.tsx`
+## Phase 2: Foundational & Core Services
 
-## Phase 4: User Story 2 (Provide Technical Details)
+*Goal: Establish the core services, state management, and application shell that all features will depend on.*
 
-- **Goal**: Allow users to view the detailed technical chart data if requested.
-- **Independent Test**: Check "Include Technical Details" box, generate horoscope, verify technical chart display.
+- [ ] T008 Copy API type definitions into `src/shared/src/types/api.ts`
+- [ ] T009 [P] Set up the main Redux store configuration in `src/shared/src/state/store.ts`
+- [ ] T010 Implement a core API service client in `src/shared/src/services/apiService.ts` to handle fetch requests
+- [ ] T011 Implement API key retrieval from secure endpoint within the `apiService.ts` (TR-002)
+- [ ] T012 Set up the main application router in `src/web/src/app/Router.tsx`
+- [ ] T013 Create a main `<App />` component with layout (header, content area) in `src/web/src/app/App.tsx`
+- [ ] T014 Instrument the frontend app with Azure Application Insights in `src/web/src/main.tsx` (NFR-002)
 
-- [ ] T021 [P] [US2] Create `TechnicalChartDisplay` presentational component in `packages/web/src/components/display/TechnicalChartDisplay.tsx` (using MUI)
-- [ ] T022 [US2] Update `HoroscopePage` to conditionally render `TechnicalChartDisplay` based on `includeTechnicalDetails` state
-- [ ] T023 [US2] Ensure `horoscopeSlice.ts` correctly handles the `technicalChart` part of the API response
+## Phase 3: User Story 1 - Generate a Horoscope
 
-## Phase 5: User Story 3 (Choose Display Language)
+*Goal: As a user, I want to enter my birth details into a simple form and submit them to receive a complete horoscope interpretation.*  
+*Independent Test: Load the app, fill the form, click "Generate", and see a result.*
 
-- **Goal**: Allow users to switch between English and Vietnamese for the interpretation.
-- **Independent Test**: Select "Vietnamese" in language switcher, generate horoscope, verify interpretation text is in Vietnamese.
+- [ ] T015 [US1] Create the `horoscopeSlice` for managing horoscope data and API status in `src/shared/src/state/horoscopeSlice.ts`
+- [ ] T016 [US1] Add the `horoscopeSlice` reducer to the main store in `src/shared/src/state/store.ts`
+- [ ] T017 [P] [US1] Create the `HoroscopeForm` presentational component with all required input fields in `src/web/src/features/horoscope/HoroscopeForm.tsx` (FR-001)
+- [ ] T018 [P] [US1] Create the `HoroscopeResult` presentational component to display interpretation data in `src/web/src/features/horoscope/HoroscopeResult.tsx` (FR-005)
+- [ ] T019 [US1] Create the `HomePage` container component to manage the form and result display in `src/web/src/pages/HomePage.tsx`
+- [ ] T020 [US1] Implement client-side validation logic within the `HoroscopeForm` component (FR-002)
+- [ ] T021 [US1] Write unit tests for `horoscopeSlice` using Vitest in `src/shared/src/state/horoscopeSlice.test.ts` (TR-004)
+- [ ] T022 [P] [US1] Write unit tests for the `HoroscopeForm` and `HoroscopeResult` components using RTL in `src/web/src/features/horoscope/` (TR-004)
 
-- [ ] T024 [P] [US3] Create Redux slice (`settingsSlice.ts`) in `packages/core/src/state/` to manage user settings, including `language`
-- [ ] T025 [P] [US3] Implement `LanguageSwitcher` component in `packages/web/src/components/controls/LanguageSwitcher.tsx` (using MUI)
-- [ ] T026 [US3] Update `horoscopeSlice.ts` to use the `language` setting when making API calls
-- [ ] T027 [US3] Integrate `LanguageSwitcher` into `HoroscopePage` or main application layout
+## Phase 4: User Story 2 - View Technical Chart Details
+
+*Goal: As an advanced user, I want to view the detailed technical chart data.*  
+*Independent Test: Check the "Include Technical Details" box, generate a horoscope, and see the chart data.*
+
+- [ ] T023 [US2] Update the `HoroscopeForm` component to include the `includeTechnicalDetails` checkbox in `src/web/src/features/horoscope/HoroscopeForm.tsx`
+- [ ] T024 [P] [US2] Create the `TechnicalChart` presentational component to display palaces and stars in `src/web/src/features/horoscope/TechnicalChart.tsx` (FR-006)
+- [ ] T025 [US2] Update the `HoroscopeResult` component to conditionally render the `TechnicalChart` component
+- [ ] T026 [P] [US2] Write unit tests for the `TechnicalChart` component in `src/web/src/features/horoscope/TechnicalChart.test.tsx` (TR-004)
+
+## Phase 5: User Story 3 - Choose Display Language
+
+*Goal: As a user, I want to switch the application's display language between English and Vietnamese.*  
+*Independent Test: Use a language switcher, generate a horoscope, and verify the result is in the selected language.*
+
+- [ ] T027 [US3] Create the `settingsSlice` for managing language preference in `src/shared/src/state/settingsSlice.ts`
+- [ ] T028 [US3] Add the `settingsSlice` reducer to the main store in `src/shared/src/state/store.ts`
+- [ ] T029 [P] [US3] Create a `LanguageSwitcher` component in `src/web/src/components/LanguageSwitcher.tsx`
+- [ ] T030 [US3] Add the `LanguageSwitcher` to the main application layout in `src/web/src/app/App.tsx`
+- [ ] T031 [US3] Update the API call logic to include the selected language from the `settingsSlice`
+- [ ] T032 [P] [US3] Write unit tests for the `settingsSlice` in `src/shared/src/state/settingsSlice.test.ts` (TR-004)
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T028 Implement `InitialOnboarding` component in `packages/web/src/components/onboarding/InitialOnboarding.tsx` and integrate into `HoroscopePage` (FR-008)
-- [ ] T029 Implement API Key retrieval from a secure endpoint (TR-002) in `packages/core/src/services/auth.ts`
-- [ ] T030 Integrate API Key retrieval into `apiClient.ts` for authenticated calls
-- [ ] T031 Implement global error handling and display user-friendly notifications (e.g., using MUI Snackbar)
-- [ ] T032 Ensure responsiveness of the UI across common device breakpoints (e.g., using MUI Grid system)
-- [ ] T033 Add basic unit tests for Redux slices in `packages/core/src/state/`
-- [ ] T034 Add basic component tests for key presentational components (e.g., `BirthDetailsForm`) in `packages/web/src/components/`
-- [ ] T035 Review and optimize build configuration for `packages/web` (production build, tree-shaking)
-- [ ] T036 Set up `pnpm` run scripts for development, build, and test
+*Goal: Address final requirements for error handling, loading states, and overall UX.*
+
+- [ ] T033 Implement a global error display mechanism for API errors in `src/web/src/app/App.tsx` (FR-007)
+- [ ] T034 Ensure a loading indicator is displayed prominently during API calls (FR-004)
+- [ ] T035 Implement the brief onboarding message for first-time users in `src/web/src/pages/HomePage.tsx` (FR-008)
+- [ ] T036 Perform a final review of all components to ensure adherence to MUI design principles (NFR-001)
+- [ ] T037 Conduct cross-browser testing on the latest two versions of Chrome, Firefox, Edge, and Safari (TR-003)
+
+## Dependency Graph
+
+- **Phase 1** -> **Phase 2**
+- **Phase 2** -> **Phase 3 (US1)**
+- **Phase 3 (US1)** -> **Phase 4 (US2)**
+- **Phase 2** -> **Phase 5 (US3)**
+
+*Note: US2 depends on US1 being complete. US3 can be developed in parallel with US1 and US2 after Phase 2 is done.*
