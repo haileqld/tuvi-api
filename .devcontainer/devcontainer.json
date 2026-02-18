@@ -1,0 +1,29 @@
+{
+    "name": "Tuvi API & Web (.NET, Node.js, AZD)",
+    "image": "mcr.microsoft.com/devcontainers/dotnet:8.0-bookworm",
+    "features": {
+      "ghcr.io/devcontainers/features/node:1": {
+        "version": "18"
+      },
+      "ghcr.io/devcontainers/features/azure-cli:1": {},
+      "ghcr.io/azure/azure-dev/azd:latest": {}
+    },
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "ms-azuretools.azure-dev",
+          "ms-dotnettools.csdevkit",
+          "ms-azuretools.vscode-azurefunctions",
+          "ms-azuretools.vscode-docker",
+          "dbaeumer.vscode-eslint",
+          "esbenp.prettier-vscode"
+        ]
+      }
+    },
+    "forwardPorts": [
+      7071,
+      5173
+    ],
+    "postCreateCommand": "npm install -g pnpm && pnpm install",
+    "remoteUser": "vscode"
+  }

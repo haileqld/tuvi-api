@@ -1,0 +1,170 @@
+openapi: 3.0.1
+info:
+  title: Tuvi Horoscope API
+  description: API for generating Vietnamese Horoscope (Tử Vi) interpretations.
+  version: '1.0'
+paths:
+  /api/v1/horoscope/generate:
+    post:
+      tags:
+        - Horoscope
+      summary: Generate a Horoscope Interpretation
+      operationId: generateHoroscope
+      requestBody:
+        description: User birth details and request options.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HoroscopeGenerateRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful generation of a horoscope interpretation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/HoroscopeGenerateResponse'
+                  error:
+                    type: 'null'
+        '400':
+          description: Invalid input. The request body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error. An unexpected error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+components:
+  schemas:
+    HoroscopeGenerateRequest:
+      type: object
+      required:
+        - gender
+        - gregorianBirthDate
+        - timezoneOffset
+      properties:
+        name:
+          type: string
+          description: Display name for personalization. Not used in chart calculation.
+          example: 'Jane Doe'
+        gender:
+          type: string
+          description: User's gender.
+          example: 'Female'
+        gregorianBirthDate:
+          type: string
+          format: date-time
+          description: ISO 8601 formatted date-time string of the user's birth.
+          example: '1990-01-15T09:30:00Z'
+        timezoneOffset:
+          type: number
+          format: float
+          description: Timezone offset from UTC in hours (e.g., -7, +5.5).
+          example: -7
+        language:
+          type: string
+          description: Desired output language.
+          default: 'en'
+          example: 'vi'
+        includeTechnicalDetails:
+          type: boolean
+          description: Flag to include detailed chart data in the response.
+          default: false
+    HoroscopeGenerateResponse:
+      type: object
+      properties:
+        interpretation:
+          type: array
+          items:
+            $ref: '#/components/schemas/InterpretationItem'
+        technicalChart:
+          $ref: '#/components/schemas/TechnicalChart'
+    InterpretationItem:
+      type: object
+      properties:
+        areaName:
+          type: string
+          example: 'Mệnh (Self)'
+        headline:
+          type: string
+          example: 'A life of determined leadership.'
+        powerScore:
+          type: integer
+          format: int32
+          description: A 0-100 score representing the strength/favorability of this area.
+          example: 85
+        detail:
+          type: string
+          example: 'Your chart indicates a strong presence of the Tử Vi star, suggesting a natural inclination towards leadership...'
+        advice:
+          type: string
+          example: 'Cultivate patience and listen to others to temper your strong will.'
+    TechnicalChart:
+      type: object
+      properties:
+        palaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/Palace'
+    Palace:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Mệnh'
+        location:
+          type: string
+          example: 'Dần'
+        stars:
+          type: array
+          items:
+            $ref: '#/components/schemas/StarPlacement'
+    StarPlacement:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Tử Vi'
+        category:
+          type: string
+          example: 'Major'
+        brightness:
+          type: string
+          example: 'Vượng'
+    ProblemDetails:
+      type: object
+      description: An RFC 7807-compliant problem details object.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI reference that identifies the problem type.
+          example: 'https://tools.ietf.org/html/rfc7231#section-6.5.1'
+        title:
+          type: string
+          description: A short, human-readable summary of the problem type.
+          example: 'One or more validation errors occurred.'
+        status:
+          type: integer
+          format: int32
+          description: The HTTP status code.
+          example: 400
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of the problem.
+          example: 'The "timezoneOffset" field must be between -12 and +14.'
+        instance:
+          type: string
+          format: uri
+          description: A URI reference that identifies the specific occurrence of the problem.
+          example: '/api/v1/horoscope/generate'

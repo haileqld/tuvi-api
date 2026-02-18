@@ -1,0 +1,41 @@
+# C#/.NET
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+packages/
+
+# Visual Studio
+.vs/
+*.sln.docstates
+
+# Rider
+.idea/
+
+# User-specific files
+*.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
+
+# Node.js/TypeScript
+node_modules/
+dist/
+build/
+*.log
+.env*
+coverage/
+
+# pnpm
+pnpm-lock.yaml
+
+# Monorepo packages
+packages/*/node_modules/
+packages/*/dist/
+packages/*/build/
+
+# Local settings
+local.settings.json
+secrets.json
+appsettings.Development.json
