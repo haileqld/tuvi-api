@@ -12,7 +12,7 @@ public class SuccessEnvelope<T>
     public bool Success { get; set; } = true;
 
     [JsonPropertyName("data")]
-    public T Data { get; set; }
+    public T? Data { get; set; }
 
     [JsonPropertyName("error")]
     public object? Error { get; set; } = null;
@@ -24,10 +24,10 @@ public class SuccessEnvelope<T>
 public class ProblemDetails
 {
     [JsonPropertyName("type")]
-    public string Type { get; set; }
+    public string Type { get; set; } = "about:blank";
 
     [JsonPropertyName("title")]
-    public string Title { get; set; }
+    public string Title { get; set; } = "An error occurred";
 
     [JsonPropertyName("status")]
     public int Status { get; set; }

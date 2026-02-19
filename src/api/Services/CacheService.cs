@@ -25,7 +25,7 @@ public class CacheService : ICacheService
     public async Task<HoroscopeGenerateResponse?> GetAsync(string key)
     {
         var entity = await _tableClient.GetEntityIfExistsAsync<CacheEntity>(key, key);
-        if (entity.HasValue)
+        if (entity is { HasValue: true, Value: not null })
         {
             return JsonSerializer.Deserialize<HoroscopeGenerateResponse>(entity.Value.Data);
         }

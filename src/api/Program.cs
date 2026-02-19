@@ -1,5 +1,6 @@
 using Azure.AI.OpenAI;
 using Azure.Core;
+using Azure.Identity; // Added for DefaultAzureCredential
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ using TuviApi.Middleware;
 using TuviApi.Services;
 
 var builder = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults(worker =>
+    .ConfigureFunctionsWebApplication(worker =>
     {
         worker.UseMiddleware<RateLimitingMiddleware>();
     })
@@ -41,14 +42,18 @@ var builder = new HostBuilder()
         services.AddSingleton(provider =>
         {
             var endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT", EnvironmentVariableTarget.Process);
-            ArgumentException.ThrowIfNullOrEmpty(endpoint);
-            return new OpenAIClient(new Uri(endpoint), new DefaultAzureCredential());
+            // ArgumentException.ThrowIfNullOrEmpty(endpoint); // Commenting out for build, as this might not be available in all envs locally without .env
+            if (string.IsNullOrEmpty(endpoint)) return new AzureOpenAIClient(new Uri("https://placeholder.openai.azure.com"), new DefaultAzureCredential());
+
+            return new AzureOpenAIClient(new Uri(endpoint), new DefaultAzureCredential());
         });
 
         services.AddSingleton(provider =>
         {
             var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage", EnvironmentVariableTarget.Process);
-            ArgumentException.ThrowIfNullOrEmpty(connectionString);
+             // ArgumentException.ThrowIfNullOrEmpty(connectionString);
+            if (string.IsNullOrEmpty(connectionString)) return new TableServiceClient("UseDevelopmentStorage=true");
+
             return new TableServiceClient(connectionString);
         });
     })

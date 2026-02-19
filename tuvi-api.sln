@@ -1,10 +1,16 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuviApi", "src\TuviApi.csproj", "{990636B0-28BF-FDA6-FC35-BFD36E7A8D9D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8C393D3B-C97C-4891-9995-1C4E5AEE7420}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{DC5F978F-28E5-4A63-8F58-11C6ADC18DE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuviApi.Tests", "tests\api\TuviApi.Tests\TuviApi.Tests.csproj", "{A9184D28-C5D7-423B-A7E0-90D19DAE69E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,12 +22,18 @@ Global
 		{990636B0-28BF-FDA6-FC35-BFD36E7A8D9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{990636B0-28BF-FDA6-FC35-BFD36E7A8D9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{990636B0-28BF-FDA6-FC35-BFD36E7A8D9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9184D28-C5D7-423B-A7E0-90D19DAE69E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9184D28-C5D7-423B-A7E0-90D19DAE69E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9184D28-C5D7-423B-A7E0-90D19DAE69E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9184D28-C5D7-423B-A7E0-90D19DAE69E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{990636B0-28BF-FDA6-FC35-BFD36E7A8D9D} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{DC5F978F-28E5-4A63-8F58-11C6ADC18DE2} = {8C393D3B-C97C-4891-9995-1C4E5AEE7420}
+		{A9184D28-C5D7-423B-A7E0-90D19DAE69E4} = {DC5F978F-28E5-4A63-8F58-11C6ADC18DE2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DF4D3F1-704A-496E-A859-F979B3BC4451}

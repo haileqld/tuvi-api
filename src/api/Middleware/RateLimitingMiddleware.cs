@@ -2,6 +2,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http; // For HttpContext
 using System.Net;
 using System.Threading.Tasks;
 
@@ -22,8 +23,26 @@ public class RateLimitingMiddleware : IFunctionsWorkerMiddleware
 
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
-        var httpReq = await context.GetHttpRequestDataAsync();
-        var ipAddress = httpReq?.GetClientIpAddress();
+        // For ASP.NET Core integration, we use HttpContext
+        var httpContext = context.GetHttpContext();
+
+        if (httpContext == null)
+        {
+            // Not an HTTP trigger or something went wrong
+            await next(context);
+            return;
+        }
+
+        var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString();
+
+        if (string.IsNullOrEmpty(ipAddress))
+        {
+            // Fallback to X-Forwarded-For if behind a proxy
+            if (httpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor))
+            {
+                ipAddress = forwardedFor.FirstOrDefault()?.Split(',').First().Trim();
+            }
+        }
 
         if (string.IsNullOrEmpty(ipAddress))
         {
@@ -37,13 +56,11 @@ public class RateLimitingMiddleware : IFunctionsWorkerMiddleware
         if (entry != null && entry.Count >= Limit && System.DateTime.UtcNow < entry.ExpiresAt)
         {
             _logger.LogWarning("Rate limit exceeded for IP address: {IPAddress}", ipAddress);
-            var httpResponse = context.GetHttpResponseData();
-            if (httpResponse != null)
-            {
-                httpResponse.StatusCode = HttpStatusCode.TooManyRequests;
-                await httpResponse.WriteStringAsync("Rate limit exceeded.");
-                context.GetInvocationResult().Value = httpResponse;
-            }
+            
+            httpContext.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
+            await httpContext.Response.WriteAsync("Rate limit exceeded.");
+            
+            // Short-circuit the pipeline
             return;
         }
 
@@ -59,19 +76,6 @@ public class RateLimitingMiddleware : IFunctionsWorkerMiddleware
         await next(context);
     }
 }
-
-public static class HttpRequestDataExtensions
-{
-    public static string? GetClientIpAddress(this HttpRequestData req)
-    {
-        if (req.Headers.TryGetValues("X-Forwarded-For", out var values))
-        {
-            return values.FirstOrDefault()?.Split(',').First().Trim();
-        }
-        return req.Headers.TryGetValues("REMOTE_ADDR", out values) ? values.FirstOrDefault() : null;
-    }
-}
-
 
 public class RateLimitEntry
 {
