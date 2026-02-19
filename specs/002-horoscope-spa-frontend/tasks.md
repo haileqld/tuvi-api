@@ -12,13 +12,13 @@ The implementation will follow an MVP-first approach, prioritizing the core user
 
 *Goal: Initialize the monorepo structure and all project scaffolds.*
 
-- [ ] T001 Create the core directory structure: `src/api`, `src/web`, `src/shared`, `tests/api`
-- [ ] T002 Initialize the C# Azure Functions project in `src/api/TuviApi.csproj`
-- [ ] T003 Initialize the React + Vite frontend project in `src/web/`
-- [ ] T004 Initialize the shared TypeScript package in `src/shared/`
-- [ ] T005 [P] Configure the root `pnpm-workspace.yaml` to include `src/web` and `src/shared`
-- [ ] T006 [P] Create the `.devcontainer/devcontainer.json` file for a consistent development environment
-- [ ] T007 [P] Create the `azure.yaml` file for Azure Developer CLI orchestration
+- [X] T001 Create the core directory structure: `src/api`, `src/web`, `src/shared`, `tests/api`
+- [X] T002 Initialize the C# Azure Functions project in `src/api/TuviApi.csproj`
+- [X] T003 Initialize the React + Vite frontend project in `src/web/`
+- [X] T004 Initialize the shared TypeScript package in `src/shared/`
+- [X] T005 [P] Configure the root `pnpm-workspace.yaml` to include `src/web` and `src/shared`
+- [X] T006 [P] Create the `.devcontainer/devcontainer.json` file for a consistent development environment
+- [X] T007 [P] Create the `azure.yaml` file for Azure Developer CLI orchestration
 
 ## Phase 2: Foundational & Core Services
 

@@ -29,6 +29,7 @@ coverage/
 
 # pnpm
 pnpm-lock.yaml
+.pnpm-store/
 
 # Monorepo packages
 packages/*/node_modules/

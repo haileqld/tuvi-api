@@ -1,3 +1,4 @@
 packages:
   - 'packages/*'
-  - 'src/shared'    
+  - 'src/shared'
+  - 'src/web'    
