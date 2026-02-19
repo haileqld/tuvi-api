@@ -29,6 +29,6 @@
       7071,
       5173
     ],
-    "postCreateCommand": "npm install -g pnpm && pnpm install && (npm install -g gemini-cli || npm install -g @google/gemini-cli || pip3 install --user gemini-cli || true)",
+    "postCreateCommand": "bash ./.devcontainer/scripts/install-gemini.sh && npm install -g pnpm && pnpm install",
     "remoteUser": "vscode"
   }
