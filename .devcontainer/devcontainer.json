@@ -16,7 +16,12 @@
           "ms-azuretools.vscode-azurefunctions",
           "ms-azuretools.vscode-docker",
           "dbaeumer.vscode-eslint",
-          "esbenp.prettier-vscode"
+          "esbenp.prettier-vscode",
+          "mhutchie.git-graph",
+          "donjayamanne.githistory",
+          "waderyan.gitblame",
+          "eamodio.gitlens",
+          "googlecloudtools.cloudcode"
         ]
       }
     },
@@ -24,6 +29,6 @@
       7071,
       5173
     ],
-    "postCreateCommand": "npm install -g pnpm && pnpm install",
+    "postCreateCommand": "npm install -g pnpm && pnpm install && (npm install -g gemini-cli || npm install -g @google/gemini-cli || pip3 install --user gemini-cli || true)",
     "remoteUser": "vscode"
   }
