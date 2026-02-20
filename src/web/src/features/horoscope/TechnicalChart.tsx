@@ -10,6 +10,7 @@ import {
   ListItemText, 
   Chip 
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { TechnicalChart as TechnicalChartType } from '@tuvi/shared';
 
 interface TechnicalChartProps {
@@ -17,10 +18,12 @@ interface TechnicalChartProps {
 }
 
 export const TechnicalChart: React.FC<TechnicalChartProps> = ({ chart }) => {
+  const { t } = useTranslation();
+
   return (
     <Box sx={{ mt: 4 }}>
       <Typography variant="h5" gutterBottom>
-        Technical Chart Details
+        {t('result.technicalChart')}
       </Typography>
       <Grid container spacing={2}>
         {chart.palaces.map((palace, index) => (
@@ -31,7 +34,7 @@ export const TechnicalChart: React.FC<TechnicalChartProps> = ({ chart }) => {
                   {palace.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Location: {palace.location}
+                  {t('result.location')}: {palace.location}
                 </Typography>
                 <List dense>
                   {palace.stars.map((star, sIndex) => (

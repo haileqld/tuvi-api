@@ -9,6 +9,7 @@ import {
   Chip, 
   Alert 
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { HoroscopeGenerateResponse } from '@tuvi/shared';
 import { TechnicalChart } from './TechnicalChart';
 
@@ -18,6 +19,8 @@ interface HoroscopeResultProps {
 }
 
 export const HoroscopeResult: React.FC<HoroscopeResultProps> = ({ result, error }) => {
+  const { t } = useTranslation();
+
   if (error) {
     return (
       <Box sx={{ mt: 2 }}>
@@ -31,7 +34,7 @@ export const HoroscopeResult: React.FC<HoroscopeResultProps> = ({ result, error 
   return (
     <Box sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Your Horoscope Interpretation
+        {t('result.interpretation')}
       </Typography>
       <Grid container spacing={3}>
         {result.interpretation.map((item, index) => (

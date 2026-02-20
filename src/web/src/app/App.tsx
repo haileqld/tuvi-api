@@ -14,6 +14,7 @@ import {
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useAppSelector } from '@tuvi/shared';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const theme = createTheme({
   palette: {
@@ -28,7 +29,15 @@ const theme = createTheme({
 
 function App() {
   const { error } = useAppSelector((state) => state.horoscope);
+  const { language } = useAppSelector((state) => state.settings);
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (i18n.language !== language) {
+      i18n.changeLanguage(language);
+    }
+  }, [language, i18n]);
 
   React.useEffect(() => {
     if (error) {
@@ -50,7 +59,7 @@ function App() {
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Tuvi Horoscope
+              {t('app.title')}
             </Typography>
             <LanguageSwitcher />
           </Toolbar>
@@ -61,7 +70,7 @@ function App() {
         <Box component="footer" sx={{ py: 3, px: 2, mt: 'auto', backgroundColor: (theme) => theme.palette.grey[200] }}>
           <Container maxWidth="sm">
             <Typography variant="body2" color="text.secondary" align="center">
-              © {new Date().getFullYear()} Tuvi Horoscope. All rights reserved.
+              © {new Date().getFullYear()} {t('app.title')}. All rights reserved.
             </Typography>
           </Container>
         </Box>

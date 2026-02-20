@@ -19,17 +19,15 @@ public interface IAiInterpretationService
 
 public class AiInterpretationService : IAiInterpretationService
 {
-    private readonly AzureOpenAIClient _openAIClient;
+    private readonly ChatClient _chatClient;
     private readonly ILogger<AiInterpretationService> _logger;
     private readonly ResourceManager _resourceManager;
-    private readonly string _deploymentName;
 
-    public AiInterpretationService(AzureOpenAIClient openAIClient, ILogger<AiInterpretationService> logger, IConfiguration configuration)
+    public AiInterpretationService(ChatClient chatClient, ILogger<AiInterpretationService> logger)
     {
-        _openAIClient = openAIClient;
+        _chatClient = chatClient;
         _logger = logger;
         _resourceManager = new ResourceManager("TuviApi.Prompts", typeof(AiInterpretationService).Assembly);
-        _deploymentName = configuration["AZURE_OPENAI_DEPLOYMENT_NAME"] ?? "gpt-4";
     }
 
     public async Task<IEnumerable<InterpretationItem>> GetInterpretationAsync(TechnicalChart chart, string language)
@@ -39,8 +37,6 @@ public class AiInterpretationService : IAiInterpretationService
             ?? _resourceManager.GetString("SystemPrompt", CultureInfo.InvariantCulture);
 
         var userPrompt = JsonSerializer.Serialize(chart);
-
-        var chatClient = _openAIClient.GetChatClient(_deploymentName);
 
         var messages = new List<ChatMessage>
         {
@@ -56,10 +52,10 @@ public class AiInterpretationService : IAiInterpretationService
 
         try
         {
-            // Set a 30-second timeout for the AI call as per FR-018
-            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            // Set a 120-second timeout for the AI call to accommodate local LLMs
+            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1200));
             
-            ClientResult<ChatCompletion> response = await chatClient.CompleteChatAsync(messages, options, cancellationTokenSource.Token);
+            ClientResult<ChatCompletion> response = await _chatClient.CompleteChatAsync(messages, options, cancellationTokenSource.Token);
 
             if (response.Value.Usage != null)
             {
@@ -67,6 +63,18 @@ public class AiInterpretationService : IAiInterpretationService
                     response.Value.Usage.InputTokenCount,
                     response.Value.Usage.OutputTokenCount,
                     response.Value.Usage.TotalTokenCount);
+            }
+
+            if (response.Value.Content == null || response.Value.Content.Count == 0)
+            {
+                _logger.LogWarning("AI response content is empty.");
+                return new List<InterpretationItem> { 
+                    new InterpretationItem { 
+                        AreaName = "Error", 
+                        Headline = "Interpretation Unavailable", 
+                        Detail = "The AI returned an empty response." 
+                    } 
+                };
             }
 
             var interpretationJson = response.Value.Content[0].Text;
@@ -99,7 +107,7 @@ public class AiInterpretationService : IAiInterpretationService
         }
         catch (OperationCanceledException)
         {
-            _logger.LogError("AI interpretation request timed out after 30 seconds.");
+            _logger.LogError("AI interpretation request timed out after 120 seconds.");
             throw new Exception("The AI interpretation service timed out.");
         }
         catch (Exception ex)

@@ -1,10 +1,12 @@
+using OpenAI.Chat;
 using Azure.AI.OpenAI;
 using Azure.Core;
-using Azure.Identity; // Added for DefaultAzureCredential
+using Azure.Identity;
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
 using System;
 using TuviApi.Lib.Charting;
 using TuviApi.Middleware;
@@ -38,20 +40,40 @@ var builder = new HostBuilder()
         services.AddSingleton<ICacheService, CacheService>();
         services.AddSingleton<IChartingService, ChartingService>();
 
-        // Configure Azure Clients
-        services.AddSingleton(provider =>
+        // Configure AI Chat Client
+        services.AddSingleton<ChatClient>(provider =>
         {
-            var endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT", EnvironmentVariableTarget.Process);
-            // ArgumentException.ThrowIfNullOrEmpty(endpoint); // Commenting out for build, as this might not be available in all envs locally without .env
-            if (string.IsNullOrEmpty(endpoint)) return new AzureOpenAIClient(new Uri("https://placeholder.openai.azure.com"), new DefaultAzureCredential());
+            var configuration = provider.GetRequiredService<IConfiguration>();
+            var endpoint = configuration["AI_ENDPOINT"];
+            var model = configuration["AI_MODEL"] ?? "gpt-4";
+            var apiKey = configuration["AI_API_KEY"] ?? "placeholder";
 
-            return new AzureOpenAIClient(new Uri(endpoint), new DefaultAzureCredential());
+            if (!string.IsNullOrEmpty(endpoint) && endpoint.Contains("openai.azure.com"))
+            {
+                // Azure OpenAI
+                var azureClient = new AzureOpenAIClient(new Uri(endpoint), new DefaultAzureCredential());
+                return azureClient.GetChatClient(model);
+            }
+            else if (!string.IsNullOrEmpty(endpoint))
+            {
+                // Generic OpenAI (Ollama, local LLM, etc.)
+                var options = new OpenAI.OpenAIClientOptions();
+                options.Endpoint = new Uri(endpoint);
+                
+                var client = new OpenAI.OpenAIClient(new System.ClientModel.ApiKeyCredential(apiKey), options);
+                return client.GetChatClient(model);
+            }
+            else
+            {
+                // Fallback / Placeholder
+                var azureClient = new AzureOpenAIClient(new Uri("https://placeholder.openai.azure.com"), new DefaultAzureCredential());
+                return azureClient.GetChatClient(model);
+            }
         });
 
         services.AddSingleton(provider =>
         {
             var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage", EnvironmentVariableTarget.Process);
-             // ArgumentException.ThrowIfNullOrEmpty(connectionString);
             if (string.IsNullOrEmpty(connectionString)) return new TableServiceClient("UseDevelopmentStorage=true");
 
             return new TableServiceClient(connectionString);

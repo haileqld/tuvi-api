@@ -58,15 +58,23 @@ The implementation will follow an MVP-first approach, prioritizing the core user
 
 ## Phase 5: User Story 3 - Choose Display Language
 
-*Goal: As a user, I want to switch the application's display language between English and Vietnamese.*  
-*Independent Test: Use a language switcher, generate a horoscope, and verify the result is in the selected language.*
+*Goal: As a user, I want to switch the application's display language (both API and UI) between English and Vietnamese.*  
+*Independent Test: Use a language switcher, verify UI text changes, generate a horoscope, and verify the result is in the selected language.*
 
 - [X] T027 [US3] Create the `settingsSlice` for managing language preference in `src/shared/src/state/settingsSlice.ts`
 - [X] T028 [US3] Add the `settingsSlice` reducer to the main store in `src/shared/src/state/store.ts`
 - [X] T029 [P] [US3] Create a `LanguageSwitcher` component in `src/web/src/components/LanguageSwitcher.tsx`
 - [X] T030 [US3] Add the `LanguageSwitcher` to the main application layout in `src/web/src/app/App.tsx`
-- [X] T031 [US3] Update the API call logic to include the selected language from the `settingsSlice`
+- [X] T031 [US3] Update the API call logic to include the selected language from the `settingsSlice` in `src/web/src/pages/HomePage.tsx`
 - [X] T032 [P] [US3] Write unit tests for the `settingsSlice` in `src/shared/src/state/settingsSlice.test.ts` (TR-004)
+- [X] T038 [P] [US3] Add `i18next` and `react-i18next` dependencies to `src/web/package.json`
+- [X] T039 [US3] Create `i18n.ts` configuration with English and Vietnamese translations in `src/web/src/app/i18n.ts`
+- [X] T040 [US3] Wrap the application with `I18nextProvider` in `src/web/src/main.tsx`
+- [X] T041 [US3] Synchronize the i18n language with the `settingsSlice` state in `src/web/src/app/App.tsx`
+- [X] T042 [US3] Replace hardcoded text with `t()` function calls in `src/web/src/pages/HomePage.tsx`
+- [X] T043 [US3] Replace hardcoded text with `t()` function calls in `src/web/src/features/horoscope/HoroscopeForm.tsx`
+- [X] T044 [US3] Replace hardcoded text with `t()` function calls in `src/web/src/features/horoscope/HoroscopeResult.tsx`
+- [X] T045 [US3] Replace hardcoded text with `t()` function calls in `src/web/src/app/App.tsx`
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
@@ -76,7 +84,7 @@ The implementation will follow an MVP-first approach, prioritizing the core user
 - [X] T034 Ensure a loading indicator is displayed prominently during API calls (FR-004)
 - [X] T035 Implement the brief onboarding message for first-time users in `src/web/src/pages/HomePage.tsx` (FR-008)
 - [X] T036 Perform a final review of all components to ensure adherence to MUI design principles (NFR-001)
-- [X] T037 Conduct cross-browser testing on the latest two versions of Chrome, Firefox, Edge, and Safari (TR-003)
+- [ ] T037 Conduct cross-browser testing on the latest two versions of Chrome, Firefox, Edge, and Safari (TR-003)
 
 ## Dependency Graph
 
@@ -84,5 +92,6 @@ The implementation will follow an MVP-first approach, prioritizing the core user
 - **Phase 2** -> **Phase 3 (US1)**
 - **Phase 3 (US1)** -> **Phase 4 (US2)**
 - **Phase 2** -> **Phase 5 (US3)**
+- **Phase 5 (US3)** -> **Phase 6**
 
-*Note: US2 depends on US1 being complete. US3 can be developed in parallel with US1 and US2 after Phase 2 is done.*
+*Note: US2 depends on US1 being complete. US3 can be developed in parallel with US1 and US2 after Phase 2 is done. Polish phase follows completion of all User Stories.*

@@ -4,7 +4,12 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // @ts-ignore
+  server: {
+    port: 5173,
+    host: '0.0.0.0',
+    strictPort: true
+  },
+  // @ts-expect-error - vitest types are not fully compatible with vite config
   test: {
     globals: true,
     environment: 'jsdom',

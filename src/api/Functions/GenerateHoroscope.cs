@@ -35,25 +35,36 @@ public class GenerateHoroscope
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        var request = JsonSerializer.Deserialize<HoroscopeGenerateRequest>(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-
-        // Basic validation
-        if (request == null || request.GregorianBirthDate == default)
+        try
         {
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            var request = JsonSerializer.Deserialize<HoroscopeGenerateRequest>(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+            // Basic validation
+            if (request == null || request.GregorianBirthDate == default)
+            {
+                var problem = new TuviApi.Models.ProblemDetails
+                {
+                    Status = (int)HttpStatusCode.BadRequest,
+                    Title = "Invalid Request",
+                    Detail = "Request body is missing or invalid."
+                };
+                return new BadRequestObjectResult(problem);
+            }
+
+            var result = await _horoscopeService.GenerateAsync(request);
+            return new OkObjectResult(new SuccessEnvelope<HoroscopeGenerateResponse> { Data = result });
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Failed to deserialize request body.");
             var problem = new TuviApi.Models.ProblemDetails
             {
                 Status = (int)HttpStatusCode.BadRequest,
                 Title = "Invalid Request",
-                Detail = "Request body is missing or invalid."
+                Detail = "The request body is not a valid JSON or does not match the expected format."
             };
             return new BadRequestObjectResult(problem);
-        }
-
-        try
-        {
-            var result = await _horoscopeService.GenerateAsync(request);
-            return new OkObjectResult(new SuccessEnvelope<HoroscopeGenerateResponse> { Data = result });
         }
         catch (System.Exception ex)
         {

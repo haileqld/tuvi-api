@@ -10,8 +10,10 @@ import {
   FormControlLabel, 
   Checkbox, 
   Grid, 
-  FormHelperText
+  FormHelperText,
+  SelectChangeEvent
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import type { HoroscopeGenerateRequest } from '@tuvi/shared';
 
 interface HoroscopeFormProps {
@@ -20,6 +22,7 @@ interface HoroscopeFormProps {
 }
 
 export const HoroscopeForm: React.FC<HoroscopeFormProps> = ({ onSubmit, isLoading }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<Partial<HoroscopeGenerateRequest>>({
     gender: 'male',
     language: 'en',
@@ -29,8 +32,12 @@ export const HoroscopeForm: React.FC<HoroscopeFormProps> = ({ onSubmit, isLoadin
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: any } }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string | number>) => {
     const { name, value } = e.target;
+    
+    // Type guard or explicit check if needed, but for this simple form, value is fine
+    // MUI Select value can be string or number, TextField value is string
+    
     setFormData((prev) => ({ ...prev, [name]: value }));
     
     // Clear error when user types
@@ -50,8 +57,8 @@ export const HoroscopeForm: React.FC<HoroscopeFormProps> = ({ onSubmit, isLoadin
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!formData.gender) newErrors.gender = 'Gender is required';
-    if (!formData.gregorianBirthDate) newErrors.gregorianBirthDate = 'Birth date and time are required';
+    if (!formData.gender) newErrors.gender = t('form.gender') + ' is required';
+    if (!formData.gregorianBirthDate) newErrors.gregorianBirthDate = t('form.birthDate') + ' is required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -71,24 +78,24 @@ export const HoroscopeForm: React.FC<HoroscopeFormProps> = ({ onSubmit, isLoadin
           <TextField
             name="name"
             fullWidth
-            label="Name (Optional)"
+            label={t('form.name')}
             value={formData.name || ''}
             onChange={handleChange}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth error={!!errors.gender}>
-            <InputLabel id="gender-label">Gender</InputLabel>
+            <InputLabel id="gender-label">{t('form.gender')}</InputLabel>
             <Select
               labelId="gender-label"
               id="gender-select"
               name="gender"
               value={formData.gender}
-              label="Gender"
-              onChange={(e) => handleChange(e as any)}
+              label={t('form.gender')}
+              onChange={handleChange}
             >
-              <MenuItem value="male">Male</MenuItem>
-              <MenuItem value="female">Female</MenuItem>
+              <MenuItem value="male">{t('form.male')}</MenuItem>
+              <MenuItem value="female">{t('form.female')}</MenuItem>
             </Select>
             {errors.gender && <FormHelperText>{errors.gender}</FormHelperText>}
           </FormControl>
@@ -97,7 +104,7 @@ export const HoroscopeForm: React.FC<HoroscopeFormProps> = ({ onSubmit, isLoadin
           <TextField
             name="gregorianBirthDate"
             fullWidth
-            label="Birth Date and Time"
+            label={t('form.birthDate')}
             type="datetime-local"
             value={formData.gregorianBirthDate || ''}
             onChange={handleChange}
@@ -109,14 +116,14 @@ export const HoroscopeForm: React.FC<HoroscopeFormProps> = ({ onSubmit, isLoadin
         </Grid>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
-            <InputLabel id="timezone-label">Timezone Offset</InputLabel>
+            <InputLabel id="timezone-label">{t('form.timezone')}</InputLabel>
             <Select
               labelId="timezone-label"
               id="timezone-select"
               name="timezoneOffset"
               value={formData.timezoneOffset}
-              label="Timezone Offset"
-              onChange={(e) => handleChange(e as any)}
+              label={t('form.timezone')}
+              onChange={handleChange}
             >
               {Array.from({ length: 27 }, (_, i) => i - 12).map((offset) => (
                 <MenuItem key={offset} value={offset}>
@@ -136,7 +143,7 @@ export const HoroscopeForm: React.FC<HoroscopeFormProps> = ({ onSubmit, isLoadin
                 color="primary"
               />
             }
-            label="Include Technical Details"
+            label={t('form.includeTechnical')}
           />
         </Grid>
         <Grid item xs={12}>
@@ -147,7 +154,7 @@ export const HoroscopeForm: React.FC<HoroscopeFormProps> = ({ onSubmit, isLoadin
             disabled={isLoading}
             sx={{ mt: 3, mb: 2 }}
           >
-            {isLoading ? 'Generating...' : 'Generate Horoscope'}
+            {isLoading ? t('form.generating') : t('form.submit')}
           </Button>
         </Grid>
       </Grid>

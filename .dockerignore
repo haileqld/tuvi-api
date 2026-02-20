@@ -1,0 +1,14 @@
+node_modules
+dist
+build
+*.log
+.env*
+.git
+.vscode
+.devcontainer
+.gemini
+specs
+tests/api/bin
+tests/api/obj
+src/api/bin
+src/api/obj
