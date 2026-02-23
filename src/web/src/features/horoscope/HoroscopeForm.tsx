@@ -10,9 +10,9 @@ import {
   FormControlLabel, 
   Checkbox, 
   Grid, 
-  FormHelperText,
-  SelectChangeEvent
+  FormHelperText
 } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { HoroscopeGenerateRequest } from '@tuvi/shared';
 

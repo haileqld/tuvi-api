@@ -21,7 +21,7 @@ describe('HoroscopeForm', () => {
     const submitButton = screen.getByRole('button', { name: /Generate Horoscope/i });
     fireEvent.click(submitButton);
 
-    expect(await screen.findByText(/Birth date and time are required/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Birth Date and Time is required/i)).toBeInTheDocument();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
